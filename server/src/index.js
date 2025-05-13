@@ -10,9 +10,9 @@ const { PrismaClient } = require("@prisma/client");
 const rateLimit = require("express-rate-limit");
 
 // Import routes
-const authRoutes = require("./routes/auth");
-const messageRoutes = require("./routes/messages");
-const userRoutes = require("./routes/users");
+const authRoutes = require("./routes/auth.js");
+const messageRoutes = require("./routes/messages.js");
+const userRoutes = require("./routes/user.js");
 
 // Initialize Prisma client
 const prisma = new PrismaClient();
@@ -24,7 +24,7 @@ const server = http.createServer(app);
 // Configure Socket.IO with CORS
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:19006",
+    origin: process.env.CLIENT_URL || "http://localhost:8080",
     methods: ["GET", "POST"],
   },
 });
@@ -32,7 +32,7 @@ const io = new Server(server, {
 // Middleware
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:19006",
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
   })
 );
 app.use(helmet());
@@ -54,7 +54,11 @@ app.use((req, res, next) => {
   req.io = io;
   next();
 });
+//health Check Routes
 
+app.get("/", (req, res) => {
+  res.send("Healthy server");
+});
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
