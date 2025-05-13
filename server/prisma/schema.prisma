@@ -1,0 +1,52 @@
+// prisma/schema.prisma - Database schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String    @id @default(uuid())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  username         String    @unique
+  email            String    @unique
+  passwordHash     String
+  publicKey        String? // RSA public key (nullable until key generation)
+  userRole         UserRole  @default(STUDENT)
+  department       String?
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+}
+
+model Message {
+  id               String      @id @default(uuid())
+  createdAt        DateTime    @default(now())
+  senderId         String
+  sender           User        @relation("SentMessages", fields: [senderId], references: [id])
+  recipientId      String
+  recipient        User        @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  encryptedContent String
+  encryptedKey     String // AES key encrypted with recipient's public key
+  signature        String // Digital signature
+  hmac             String // Message integrity
+  messageType      MessageType
+  isRead           Boolean     @default(false)
+}
+
+enum UserRole {
+  ADMIN
+  FACULTY
+  STUDENT
+}
+
+enum MessageType {
+  RESULT
+  PLACEMENT
+  DEPARTMENT_UPDATE
+  GENERAL
+}
