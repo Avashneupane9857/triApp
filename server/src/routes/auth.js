@@ -9,6 +9,7 @@ const { authenticateToken } = require("../middleware/auth");
 // Register new user
 router.post("/register", async (req, res) => {
   try {
+    console.log('API /register called with:', req.body);
     const { username, email, password, userRole, department } = req.body;
         
     // Check if user already exists
@@ -56,19 +57,16 @@ router.post("/register", async (req, res) => {
         department: user.department,
       },
     });
-  } catch (error) {
-    console.error("Registration error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Registration failed",
-      error: error.message,
-    });
+  } catch (err) {
+    console.error('API /register error:', err);
+    res.status(500).json({ success: false, message: "Registration failed" });
   }
 });
 
 // Login
 router.post("/login", async (req, res) => {
   try {
+    console.log('API /login called with:', req.body);
     const { username, password } = req.body;
 
     // Find user
@@ -116,13 +114,9 @@ router.post("/login", async (req, res) => {
         hasPublicKey: !!user.publicKey,
       },
     });
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Login failed",
-      error: error.message,
-    });
+  } catch (err) {
+    console.error('API /login error:', err);
+    res.status(500).json({ success: false, message: "Login failed" });
   }
 });
 

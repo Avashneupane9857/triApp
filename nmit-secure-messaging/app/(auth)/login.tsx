@@ -12,10 +12,14 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
+      console.log('Login: Sending login request:', { username, password });
       const res = await api.post('/auth/login', { username, password });
+      console.log('Login: Login response:', res.data);
       await login(res.data.token, res.data.user);
-      router.replace('/(tabs)/index');
+      console.log('Login: Login complete, navigating to /tabs/index');
+     router.replace('/(tabs)');
     } catch (err) {
+      console.error('Login: Error:', err, err?.response?.data);
       Alert.alert('Login failed', err.response?.data?.message || err.message);
     }
   };

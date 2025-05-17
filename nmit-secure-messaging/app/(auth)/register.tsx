@@ -20,8 +20,11 @@ export default function RegisterScreen() {
   const handleRegister = async () => {
     setLoading(true);
     try {
+      console.log('Register: Generating key pair...');
       // 1. Generate key pair
       const { public: publicKey, private: privateKey } = await generateKeyPair();
+      console.log('Register: Key pair generated.');
+      console.log('Register: Sending registration request:', { username, email, password, department, userRole });
       // 2. Register user
       const res = await api.post('/auth/register', {
         username,
@@ -30,16 +33,22 @@ export default function RegisterScreen() {
         department,
         userRole,
       });
+      console.log('Register: Registration response:', res.data);
       // 3. Upload public key
+      console.log('Register: Uploading public key...');
       await api.put('/auth/publicKey', { publicKey }, {
         headers: { Authorization: `Bearer ${res.data.token}` }
       });
+      console.log('Register: Public key uploaded.');
       // 4. Store private key securely
       await SecureStore.setItemAsync('privateKey', privateKey);
       // 5. Login
+      console.log('Register: Logging in...');
       await login(res.data.token, res.data.user);
-      router.replace('/(tabs)/index');
+      console.log('Register: Login complete, navigating to /tabs/index');
+     router.replace('/(tabs)');
     } catch (err) {
+      console.error('Register: Error:', err, err?.response?.data);
       Alert.alert('Registration failed', err.response?.data?.message || err.message);
     } finally {
       setLoading(false);

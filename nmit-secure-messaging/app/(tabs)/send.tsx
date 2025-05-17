@@ -27,9 +27,11 @@ export default function SendMessageScreen() {
   };
 
   const handleSend = async () => {
+    console.log('Send: handleSend called', { recipient, message });
     if (!recipient) return;
     setLoading(true);
     try {
+      console.log('Send: Preparing to send message...');
       // 1. Generate AES key
       const aesKey = Math.random().toString(36).slice(2, 18); // 16 chars
       // 2. Encrypt message with AES
@@ -50,10 +52,12 @@ export default function SendMessageScreen() {
         hmac,
         messageType: 'GENERAL',
       });
+      console.log('Send: Message sent!');
       Alert.alert('Success', 'Message sent!');
       setMessage('');
       router.replace('/(tabs)/sent');
     } catch (err) {
+      console.error('Send: Error:', err, err?.response?.data);
       Alert.alert('Error', err.response?.data?.message || err.message);
     }
     setLoading(false);

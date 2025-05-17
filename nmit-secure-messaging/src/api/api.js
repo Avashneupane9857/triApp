@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // IMPORTANT: Replace with your backend server's IP address and port.
 // If running on a real device, use your computer's local network IP, not 'localhost'.
-const API_URL = 'http://192.168.1.5:3000/api';
+const API_URL = 'http://localhost:3000/api';
 
 export const api = axios.create({
   baseURL: API_URL,

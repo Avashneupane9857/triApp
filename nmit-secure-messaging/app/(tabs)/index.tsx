@@ -20,14 +20,16 @@ export default function InboxScreen() {
     try {
       const res = await api.get('/messages');
       const privateKey = await SecureStore.getItemAsync('privateKey');
-      // Decrypt each message
       const decrypted = await Promise.all(
         res.data.messages.map(async (msg) => {
           try {
             const aesKey = await decryptRSA(msg.encryptedKey, privateKey);
+            console.log('Decrypted AES key:', aesKey);
             const content = decryptAES(msg.encryptedContent, aesKey);
+            console.log('Decrypted content:', content);
             return { ...msg, decryptedContent: content };
-          } catch {
+          } catch (e) {
+            console.error('Decryption failed for message:', msg, e);
             return { ...msg, decryptedContent: '[Unable to decrypt]' };
           }
         })
