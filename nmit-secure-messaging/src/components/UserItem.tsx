@@ -3,27 +3,29 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 export default function UserItem({ user, onPress }) {
   return (
-    <TouchableOpacity onPress={onPress} style={styles.container}>
+    <TouchableOpacity onPress={onPress} style={styles.card} activeOpacity={0.85}>
       <View>
-        <Text style={styles.name}>{user.username}</Text>
-        <Text style={styles.info}>{user.department} | {user.userRole}</Text>
+        <Text style={styles.username}>{user.username}</Text>
+        <Text style={styles.email}>{user.email}</Text>
+        <Text style={styles.role}>{user.userRole}</Text>
       </View>
-      <Text style={{ color: user.hasPublicKey ? 'green' : 'red' }}>
-        {user.hasPublicKey ? '🔑' : 'No Key'}
-      </Text>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 14,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 16,
+    marginVertical: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  name: { fontWeight: 'bold', fontSize: 16 },
-  info: { color: '#555', fontSize: 13 },
+  username: { fontWeight: 'bold', color: '#1976d2', marginBottom: 4 },
+  email: { fontSize: 15, color: '#222', marginBottom: 2 },
+  role: { fontSize: 13, color: '#888' },
 });

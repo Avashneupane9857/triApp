@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { api } from '../../src/api/api';
 import { useAuth } from '../../src/context/AuthContext';
 import { SecureStoreWebShim as SecureStore } from '../../src/utils/SecureStore';
 import { encryptAES, encryptRSA, signMessage } from '../../src/utils/crypto';
+import CryptoJS from 'crypto-js';
 
 export default function SendMessageScreen() {
   const { recipientId } = useLocalSearchParams();
@@ -22,72 +23,68 @@ export default function SendMessageScreen() {
       const res = await api.get(`/users/${recipientId}/publicKey`);
       setRecipient(res.data);
     } catch (err) {
-      Alert.alert('Error', 'Failed to load recipient');
+      alert('Failed to load recipient');
     }
   };
 
   const handleSend = async () => {
-    console.log('Send: handleSend called', { recipient, message });
     if (!recipient) return;
     setLoading(true);
     try {
-      console.log('Send: Preparing to send message...');
-      // 1. Generate AES key
-      const aesKey = Math.random().toString(36).slice(2, 18); // 16 chars
-      // 2. Encrypt message with AES
+      const aesKey = CryptoJS.lib.WordArray.random(16).toString(CryptoJS.enc.Hex).slice(0, 16);
       const encryptedContent = encryptAES(message, aesKey);
-      // 3. Encrypt AES key with recipient's public key
       const encryptedKey = await encryptRSA(aesKey, recipient.publicKey);
-      // 4. Sign the message
       const privateKey = await SecureStore.getItemAsync('privateKey');
       const signature = await signMessage(message, privateKey);
-      // 5. (Optional) HMAC - for now, just use signature as placeholder
-      const hmac = signature;
-      // 6. Send
       await api.post('/messages', {
         recipientId,
         encryptedContent,
         encryptedKey,
         signature,
-        hmac,
         messageType: 'GENERAL',
       });
-      console.log('Send: Message sent!');
-      Alert.alert('Success', 'Message sent!');
       setMessage('');
       router.replace('/(tabs)/sent');
     } catch (err) {
-      console.error('Send: Error:', err, err?.response?.data);
-      Alert.alert('Error', err.response?.data?.message || err.message);
+      alert('Error sending message');
     }
     setLoading(false);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Send Message</Text>
-      {recipient && (
-        <Text style={styles.recipient}>To: {recipient.username}</Text>
-      )}
-      <TextInput
-        style={styles.input}
-        placeholder="Type your message..."
-        value={message}
-        onChangeText={setMessage}
-        multiline
-      />
-      {loading ? (
-        <ActivityIndicator />
-      ) : (
-        <Button title="Send" onPress={handleSend} disabled={!message || !recipient} />
-      )}
+      <Text style={styles.title}>✉️ Send Message</Text>
+      <View style={styles.card}>
+        {recipient && (
+          <Text style={styles.recipient}>To: <Text style={styles.recipientName}>{recipient.username}</Text></Text>
+        )}
+        <TextInput
+          style={styles.input}
+          placeholder="Type your message..."
+          value={message}
+          onChangeText={setMessage}
+          multiline
+          placeholderTextColor="#888"
+        />
+        {loading ? (
+          <ActivityIndicator />
+        ) : (
+          <TouchableOpacity style={styles.button} onPress={handleSend} disabled={!message || !recipient}>
+            <Text style={styles.buttonText}>Send</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24 },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 12 },
-  recipient: { fontSize: 16, marginBottom: 8 },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 12, minHeight: 80, marginBottom: 12 },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f6f8fa', padding: 24 },
+  title: { fontSize: 26, fontWeight: 'bold', marginBottom: 32, color: '#222' },
+  card: { width: '100%', maxWidth: 400, backgroundColor: '#fff', borderRadius: 16, padding: 24, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 },
+  recipient: { fontSize: 16, marginBottom: 8, color: '#555' },
+  recipientName: { fontWeight: 'bold', color: '#1976d2' },
+  input: { borderWidth: 1, borderColor: '#e0e0e0', borderRadius: 8, padding: 14, minHeight: 80, marginBottom: 16, fontSize: 16, backgroundColor: '#f9f9f9' },
+  button: { backgroundColor: '#1976d2', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 8 },
+  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
 });

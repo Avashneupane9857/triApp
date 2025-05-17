@@ -3,32 +3,29 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 export default function MessageItem({ message, onPress }) {
   return (
-    <TouchableOpacity onPress={onPress} style={styles.container}>
+    <TouchableOpacity onPress={onPress} style={styles.card} activeOpacity={0.85}>
       <View>
-        <Text style={styles.title}>
-          {message.sender?.username || message.recipient?.username}
-        </Text>
-        <Text numberOfLines={1} style={styles.preview}>
-          {message.decryptedContent || '[Encrypted]'}
-        </Text>
+      <Text style={styles.sender}>{message.sender?.username || message.senderName || message.senderId}</Text>
+        <Text style={styles.content}>{message.decryptedContent || '[Encrypted]'}</Text>
+        <Text style={styles.time}>{new Date(message.createdAt).toLocaleString()}</Text>
       </View>
-      <Text style={styles.time}>
-        {new Date(message.createdAt).toLocaleString()}
-      </Text>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 14,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 16,
+    marginVertical: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  title: { fontWeight: 'bold', fontSize: 16 },
-  preview: { color: '#555', marginTop: 2, maxWidth: 180 },
-  time: { color: '#888', fontSize: 12 },
+  sender: { fontWeight: 'bold', color: '#1976d2', marginBottom: 4 },
+  content: { fontSize: 16, color: '#222', marginBottom: 6 },
+  time: { fontSize: 12, color: '#888', textAlign: 'right' },
 });

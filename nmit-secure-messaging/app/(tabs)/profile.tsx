@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAuth } from '../../src/context/AuthContext';
-import { SecureStoreWebShim as SecureStore } from '../../src/utils/SecureStore';
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
@@ -10,29 +9,28 @@ export default function ProfileScreen() {
     await logout();
   };
 
-  const handleShowPrivateKey = async () => {
-    const privateKey = await SecureStore.getItemAsync('privateKey');
-    Alert.alert('Your Private Key', privateKey || 'Not found');
-  };
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
-      {user && (
-        <>
-          <Text>Username: {user.username}</Text>
-          <Text>Email: {user.email}</Text>
-          <Text>Role: {user.userRole}</Text>
-          <Text>Department: {user.department}</Text>
-        </>
-      )}
-      <Button title="Show My Private Key" onPress={handleShowPrivateKey} />
-      <Button title="Logout" onPress={handleLogout} color="red" />
+      <Text style={styles.title}>👤 Profile</Text>
+      <View style={styles.card}>
+        <Text style={styles.label}>Username: <Text style={styles.value}>{user?.username}</Text></Text>
+        <Text style={styles.label}>Email: <Text style={styles.value}>{user?.email}</Text></Text>
+        <Text style={styles.label}>Role: <Text style={styles.value}>{user?.userRole}</Text></Text>
+        <Text style={styles.label}>Department: <Text style={styles.value}>{user?.department}</Text></Text>
+        <TouchableOpacity style={styles.button} onPress={handleLogout}>
+          <Text style={styles.buttonText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24 },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 12 },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f6f8fa', padding: 24 },
+  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 32, color: '#222' },
+  card: { width: '100%', maxWidth: 400, backgroundColor: '#fff', borderRadius: 16, padding: 24, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 },
+  label: { fontSize: 16, marginBottom: 10, color: '#555' },
+  value: { fontWeight: 'bold', color: '#1976d2' },
+  button: { backgroundColor: '#d32f2f', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 24 },
+  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
 });

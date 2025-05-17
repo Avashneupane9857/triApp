@@ -24,13 +24,11 @@ export default function InboxScreen() {
         res.data.messages.map(async (msg) => {
           try {
             const aesKey = await decryptRSA(msg.encryptedKey, privateKey);
-            console.log('Decrypted AES key:', aesKey);
             const content = decryptAES(msg.encryptedContent, aesKey);
-            console.log('Decrypted content:', content);
             return { ...msg, decryptedContent: content };
           } catch (e) {
             console.error('Decryption failed for message:', msg, e);
-            return { ...msg, decryptedContent: '[Unable to decrypt]' };
+            return { ...msg, decryptedContent: `[Unable to decrypt: ${e?.message || e}]` };
           }
         })
       );

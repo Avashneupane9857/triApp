@@ -49,9 +49,19 @@ export const encryptRSA = async (text, publicKey) => {
 // Decrypt AES key with RSA private key
 export const decryptRSA = async (cipher, privateKey) => {
   if (isWeb) {
-    const priv = forge.pki.privateKeyFromPem(privateKey);
-    const decrypted = priv.decrypt(forge.util.decode64(cipher), 'RSAES-PKCS1-V1_5');
-    return forge.util.decodeUtf8(decrypted);
+    try {
+      // Normalize all line endings to \n for forge
+      const normalizedKey = privateKey
+        .replace(/\\r\\n/g, '\n')
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n');
+      const priv = forge.pki.privateKeyFromPem(normalizedKey);
+      const decrypted = priv.decrypt(forge.util.decode64(cipher), 'RSAES-PKCS1-V1_5');
+      return forge.util.decodeUtf8(decrypted);
+    } catch (e) {
+      console.error('decryptRSA error:', e);
+      throw e;
+    }
   } else {
     return await RNRSA.decrypt(cipher, privateKey);
   }
@@ -82,5 +92,3 @@ export const verifySignature = async (message, signature, publicKey) => {
     return await RNRSA.verify(message, signature, publicKey, 'SHA256');
   }
 };
-
-const aesKey = CryptoJS.lib.WordArray.random(16).toString(CryptoJS.enc.Hex).slice(0, 16);

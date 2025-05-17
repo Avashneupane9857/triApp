@@ -9,6 +9,8 @@ export const api = axios.create({
   timeout: 10000,
 });
 
+
+
 // Helper to set the Authorization header for all requests
 export const setAuthToken = (token) => {
   if (token) {
@@ -18,7 +20,10 @@ export const setAuthToken = (token) => {
   }
 };
 
+
 // --- AUTH HELPERS ---
+
+
 export const apiAuth = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),

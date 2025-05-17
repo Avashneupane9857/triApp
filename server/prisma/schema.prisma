@@ -16,7 +16,7 @@ model User {
   username         String    @unique
   email            String    @unique
   passwordHash     String
-  publicKey        String? // RSA public key (nullable until key generation)
+  publicKey        String
   userRole         UserRole  @default(STUDENT)
   department       String?
   sentMessages     Message[] @relation("SentMessages")

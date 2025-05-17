@@ -10,7 +10,7 @@ const { authenticateToken } = require("../middleware/auth");
 router.post("/register", async (req, res) => {
   try {
     console.log('API /register called with:', req.body);
-    const { username, email, password, userRole, department } = req.body;
+    const { username, email, password, userRole, department, publicKey } = req.body;
         
     // Check if user already exists
     const existingUser = await req.prisma.user.findFirst({
@@ -37,6 +37,7 @@ router.post("/register", async (req, res) => {
         passwordHash,
         userRole: userRole || "STUDENT",
         department,
+        publicKey,
       },
     });
 
