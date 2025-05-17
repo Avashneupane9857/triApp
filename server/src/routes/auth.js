@@ -10,7 +10,7 @@ const { authenticateToken } = require("../middleware/auth");
 router.post("/register", async (req, res) => {
   try {
     const { username, email, password, userRole, department } = req.body;
-
+        
     // Check if user already exists
     const existingUser = await req.prisma.user.findFirst({
       where: {

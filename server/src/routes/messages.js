@@ -136,6 +136,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
 });
 
 // Send a new message
+
 router.post("/", authenticateToken, async (req, res) => {
   try {
     const {
