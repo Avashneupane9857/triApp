@@ -176,9 +176,10 @@ router.post("/", authenticateToken, async (req, res) => {
     }
 
     // Create message
+    const senderId = req.user.userId;
     const message = await req.prisma.message.create({
       data: {
-        senderId: req.user.userId,
+        senderId,
         recipientId,
         encryptedContent,
         encryptedKey,

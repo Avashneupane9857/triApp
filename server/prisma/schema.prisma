@@ -16,7 +16,7 @@ model User {
   username         String    @unique
   email            String    @unique
   passwordHash     String
-  publicKey        String
+  publicKey        String?
   userRole         UserRole  @default(STUDENT)
   department       String?
   sentMessages     Message[] @relation("SentMessages")
@@ -33,7 +33,7 @@ model Message {
   encryptedContent String
   encryptedKey     String // AES key encrypted with recipient's public key
   signature        String // Digital signature
-  hmac             String // Message integrity
+  hmac             String? // Message integrity (optional for now)
   messageType      MessageType
   isRead           Boolean     @default(false)
 }

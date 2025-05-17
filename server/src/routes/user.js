@@ -8,68 +8,32 @@ const { authenticateToken, isAdmin } = require("../middleware/auth");
 // Get list of users (with restrictions based on role)
 router.get("/", authenticateToken, async (req, res) => {
   try {
-    // Determine what data to return based on role
-    const currentUser = await req.prisma.user.findUnique({
-      where: { id: req.user.userId },
-    });
-
-    if (!currentUser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    // Define select fields based on role
-    const selectFields = {
-      id: true,
-      username: true,
-      email: currentUser.userRole === "ADMIN" ? true : false,
-      userRole: true,
-      department: true,
-      publicKey: true,
-    };
-
-    // For non-admin users, limit the query
-    let whereClause = {};
-    if (currentUser.userRole !== "ADMIN") {
-      // Regular users can only see users with public keys
-      whereClause.publicKey = { not: null };
-    }
-
-    // Apply filters if provided
     const { department, role } = req.query;
+    const whereClause = {};
     if (department) whereClause.department = department;
     if (role) whereClause.userRole = role.toUpperCase();
 
+    // Only users with a publicKey
+    whereClause.publicKey = { not: null };
+
     const users = await req.prisma.user.findMany({
       where: whereClause,
-      select: selectFields,
-      orderBy: { username: "asc" },
+      select: {
+        id: true,
+        username: true,
+        userRole: true,
+        department: true,
+        publicKey: true
+      },
+      orderBy: {
+        username: "asc"
+      }
     });
 
-    // Transform results to add hasPublicKey property
-    const transformedUsers = users.map((user) => {
-      const hasPublicKey = !!user.publicKey;
-      // Remove actual public key from response for security
-      const { publicKey, ...userWithoutKey } = user;
-      return {
-        ...userWithoutKey,
-        hasPublicKey,
-      };
-    });
-
-    res.json({
-      success: true,
-      users: transformedUsers,
-    });
+    res.json(users);
   } catch (error) {
     console.error("Fetch users error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch users",
-      error: error.message,
-    });
+    res.status(500).json({ error: "Failed to fetch users" });
   }
 });
 

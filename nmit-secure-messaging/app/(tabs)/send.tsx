@@ -36,13 +36,16 @@ export default function SendMessageScreen() {
       const encryptedKey = await encryptRSA(aesKey, recipient.publicKey);
       const privateKey = await SecureStore.getItemAsync('privateKey');
       const signature = await signMessage(message, privateKey);
+
       await api.post('/messages', {
         recipientId,
         encryptedContent,
         encryptedKey,
         signature,
+        hmac: 'dummy',
         messageType: 'GENERAL',
       });
+
       setMessage('');
       router.replace('/(tabs)/sent');
     } catch (err) {

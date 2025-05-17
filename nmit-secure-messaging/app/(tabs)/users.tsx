@@ -9,20 +9,22 @@ export default function UsersScreen() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const res = await api.get('/users');
-      setUsers(res.data.users);
+      setUsers(res.data);
     } catch (err) {
       Alert.alert('Error', 'Failed to load users');
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  if (loading) return <ActivityIndicator style={{ marginTop: 40 }} />;
 
   return (
     <View style={{ flex: 1 }}>
